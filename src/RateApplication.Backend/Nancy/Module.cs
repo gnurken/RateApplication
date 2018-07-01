@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using Nancy;
 using Nancy.ModelBinding;
+using RateApplication.Backend.Skills;
 
-namespace RateApplication.Backend
+namespace RateApplication.Backend.Nancy
 {
     public class Module : NancyModule
     {
@@ -87,7 +88,7 @@ namespace RateApplication.Backend
             }
 
             var id = _skillsManager.AddSkill(skill);
-            skill = _skillsManager.GetSkill(id).Value;
+            skill = _skillsManager.GetSkill(id);
             return Response.AsJson(skill).WithHeader(
                 "Location",
                 Context.Request.Url + $"/{id}");

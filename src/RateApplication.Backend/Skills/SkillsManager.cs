@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RateApplication.Backend
+namespace RateApplication.Backend.Skills
 {
     public class SkillsManager : ISkillsManager
     {
@@ -23,14 +23,14 @@ namespace RateApplication.Backend
 
         public IReadOnlyList<Skill> GetSkills() => _skills;
 
-        public Skill? GetSkill(int id)
+        public Skill GetSkill(int id)
         {
-            return _skills.Cast<Skill?>().FirstOrDefault(skill => skill?.Id == id);
+            return _skills.FirstOrDefault(skill => skill.Id == id);
         }
 
-        public Skill? GetSkill(string name)
+        public Skill GetSkill(string name)
         {
-            return _skills.Cast<Skill?>().FirstOrDefault(skill => skill?.Name == name);
+            return _skills.FirstOrDefault(skill => skill.Name == name);
         }
 
         public bool HasSkill(int id)
@@ -58,9 +58,14 @@ namespace RateApplication.Backend
                     nameof(skill));
             }
 
-            skill.Id = _nextId++;
-            _skills.Add(skill);
-            return skill.Id;
+            var newSkill = new Skill
+            {
+                Id = _nextId++,
+                Name = skill.Name,
+                Rating = skill.Rating
+            };
+            _skills.Add(newSkill);
+            return newSkill.Id;
         }
 
         public void UpdateSkillRating(int id, int rating)
@@ -70,19 +75,14 @@ namespace RateApplication.Backend
                 throw new ArgumentOutOfRangeException(nameof(rating), $"Valid rating range (0-{MaxRating})");
             }
 
-            var index = _skills.FindIndex(skill => skill.Id == id);
-            if (index == -1)
+            var skill = GetSkill(id);
+            if (skill == null)
             {
                 throw new ArgumentException($"No Skill with id {id} exists.",
                     nameof(id));
             }
 
-            _skills[index] = new Skill
-            {
-                Id = id,
-                Rating = rating,
-                Name = _skills[index].Name
-            };
+            skill.Rating = rating;
         }
 
         public void RemoveSkill(int id)

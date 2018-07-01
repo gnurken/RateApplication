@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace RateApplication.Backend
+namespace RateApplication.Backend.Skills
 {
-    public struct Skill
+    public class Skill
     {
         public int Id { get; set; }
         public string Name { get; set; }

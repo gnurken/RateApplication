@@ -1,6 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 using RateApplication.Backend;
+using RateApplication.Backend.Skills;
 
 namespace RateApplication.Test
 {
@@ -91,8 +92,8 @@ namespace RateApplication.Test
             });
             var skill = skillsManager.GetSkill(id);
             Assert.That(skill, Is.Not.Null);
-            Assert.That(skill.Value.Name, Is.EqualTo("TestSkill"));
-            Assert.That(skill.Value.Rating, Is.EqualTo(rating));
+            Assert.That(skill.Name, Is.EqualTo("TestSkill"));
+            Assert.That(skill.Rating, Is.EqualTo(rating));
         }
 
         [Test]

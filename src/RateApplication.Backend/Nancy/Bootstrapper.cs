@@ -1,8 +1,9 @@
 ﻿using Nancy;
 using Nancy.Bootstrapper;
 using Nancy.TinyIoc;
+using RateApplication.Backend.Skills;
 
-namespace RateApplication.Backend
+namespace RateApplication.Backend.Nancy
 {
     public class Bootstrapper : DefaultNancyBootstrapper
     {
@@ -10,10 +11,10 @@ namespace RateApplication.Backend
             TinyIoCContainer container,
             NancyContext context)
         {
-            container.Register<ISkillsManager>(SkillsManager);
+            container.Register(SkillsManager);
         }
 
-        public static SkillsManager SkillsManager { private get; set; }
+        public static ISkillsManager SkillsManager { private get; set; }
 
         // Enable CORS
         protected override void ApplicationStartup(TinyIoCContainer container, IPipelines pipelines)
