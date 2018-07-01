@@ -1,0 +1,117 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Skills</title>
+    <style>
+        .right {
+            float: right;
+        }
+
+        .rating_cell {
+            padding: 3px;
+        }
+
+        #container {
+            width: 800px;
+            margin: auto;
+        }
+
+        #skills_table {
+            width: 100%;
+        }
+
+        tr:nth-child(even) {
+            background: #FFF;
+        }
+
+        tr:nth-child(odd) {
+            background: #CCC
+        }
+    </style>
+</head>
+<body data-ng-app="RateApp">
+    <div id="container">
+        <h1>Skills</h1>
+        <form name="new_skill_form" data-ng-controller="NewSkill">
+            <input type="text" required placeholder="Add skill..." data-ng-model="skill.name" />
+            <span data-ng-repeat="rating_value in [0,1,2,3,4,5]" class="rating_cell">
+                <input type="radio" name="rating_new" required
+                       data-ng-value="{{rating_value}}" data-ng-model="skill.rating" />
+                {{rating_value}}
+            </span>
+            <button class="right" data-ng-click="add_skill()" data-ng-disabled="!new_skill_form.$valid">Add skill</button>
+        </form>
+        <hr />
+        <table id="skills_table" data-ng-controller="SkillsList">
+            <tr data-ng-repeat="skill in skills">
+                <td>{{skill.name}}</td>
+                <td class="right">
+                    <span data-ng-repeat="rating_value in [0,1,2,3,4,5]" class="rating_cell">
+                        <input type="radio" data-ng-value="{{rating_value}}" data-ng-model="skill.rating" />
+                        {{rating_value}}
+                    </span>
+                    <button data-ng-click="delete_skill(skill.id)">X</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+    <script>
+        var app = angular.module("RateApp", []);
+        app.service("skills_api", function ($http) {
+            this.skills = [];
+            this.get_skills = function () {
+                return this.skills;
+            };
+            this.add_skill = function (skill) {
+                this.skills.push(skill);
+            };
+            this.delete_skill = function (id) {
+                var index = this.skills.findIndex(skill => skill.id == id);
+                if (index != -1) {
+                    this.skills.splice(index, 1);
+                }
+            };
+            this.update_skill_rating = function (id, rating) {
+                var matching_skill = this.skills.find(skill => skill.id == id);
+                if (matching_skill != null) {
+                    matching_skill.rating = rating;
+                }
+            };
+        });
+        app.controller("NewSkill", function ($scope, skills_api) {
+            var init = function () {
+                $scope.skill = {
+                    name: null,
+                    rating: null
+                };
+            };
+
+            init();
+
+            $scope.add_skill = function () {
+                var nameAvailable = skills_api.get_skills().findIndex(skill => skill.name == $scope.skill.name) == -1;
+                if (!nameAvailable) {
+                    window.alert("A skill named " + $scope.skill.name + " already exists.");
+                    return;
+                }
+
+                skills_api.add_skill($scope.skill);
+                init();
+            };
+        });
+        app.controller("SkillsList", function ($scope, skills_api) {
+            $scope.skills = skills_api.get_skills();
+
+            $scope.update_skill_rating = function (id, rating) {
+                skills_api.update_skill_rating(id, rating);
+            };
+            $scope.delete_skill = function (id) {
+                skills_api.delete_skill(id);
+            };
+        });
+    </script>
+</body>
+</html>
