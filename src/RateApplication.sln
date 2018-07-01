@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27428.2043
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RateApplication.Backend", "RateApplication.Backend\RateApplication.Backend.csproj", "{41A97BE8-667A-4163-8E0C-F5AC5EC3050F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RateApplication.Frontend", "RateApplication.Frontend\RateApplication.Frontend.csproj", "{3F8C0BAC-BE2A-451B-B11E-3739DC34A8BD}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RateApplication.Test", "RateApplication.Test\RateApplication.Test.csproj", "{2319CBF8-D847-4F53-805B-725197872C96}"
 EndProject
 Global
@@ -17,6 +19,10 @@ Global
 		{41A97BE8-667A-4163-8E0C-F5AC5EC3050F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{41A97BE8-667A-4163-8E0C-F5AC5EC3050F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{41A97BE8-667A-4163-8E0C-F5AC5EC3050F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F8C0BAC-BE2A-451B-B11E-3739DC34A8BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F8C0BAC-BE2A-451B-B11E-3739DC34A8BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F8C0BAC-BE2A-451B-B11E-3739DC34A8BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F8C0BAC-BE2A-451B-B11E-3739DC34A8BD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2319CBF8-D847-4F53-805B-725197872C96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2319CBF8-D847-4F53-805B-725197872C96}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2319CBF8-D847-4F53-805B-725197872C96}.Release|Any CPU.ActiveCfg = Release|Any CPU

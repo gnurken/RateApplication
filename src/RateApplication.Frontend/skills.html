@@ -34,25 +34,26 @@
 <body data-ng-app="RateApp">
     <div id="container">
         <h1>Skills</h1>
-        <form name="new_skill_form" data-ng-controller="NewSkill">
+        <form name="new_skill_form" data-ng-controller="NewSkillController">
             <input type="text" required placeholder="Add skill..." data-ng-model="skill.name" />
             <span data-ng-repeat="rating_value in [0,1,2,3,4,5]" class="rating_cell">
                 <input type="radio" name="rating_new" required
                        data-ng-value="{{rating_value}}" data-ng-model="skill.rating" />
                 {{rating_value}}
             </span>
-            <button class="right" data-ng-click="add_skill()" data-ng-disabled="!new_skill_form.$valid">Add skill</button>
+            <button class="right" data-ng-click="addSkill()" data-ng-disabled="!new_skill_form.$valid">Add skill</button>
         </form>
         <hr />
-        <table id="skills_table" data-ng-controller="SkillsList">
+        <table id="skills_table" data-ng-controller="SkillsListController">
             <tr data-ng-repeat="skill in skills">
                 <td>{{skill.name}}</td>
                 <td class="right">
                     <span data-ng-repeat="rating_value in [0,1,2,3,4,5]" class="rating_cell">
-                        <input type="radio" data-ng-value="{{rating_value}}" data-ng-model="skill.rating" />
+                        <input type="radio" data-ng-value="{{rating_value}}" data-ng-model="skill.rating"
+                               data-ng-change="updateSkillRating(skill.id, skill.rating, {{skill.rating}})" />
                         {{rating_value}}
                     </span>
-                    <button data-ng-click="delete_skill(skill.id)">X</button>
+                    <button data-ng-click="deleteSkill(skill.id)">X</button>
                 </td>
             </tr>
         </table>
@@ -60,28 +61,89 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
     <script>
         var app = angular.module("RateApp", []);
-        app.service("skills_api", function ($http) {
-            this.skills = [];
-            this.get_skills = function () {
-                return this.skills;
+        app.service("SkillsService", function ($http) {
+
+            var hasStatusCode = function (response, statusCode) {
+                return response.data != null && response.data.statusCode == statusCode;
             };
-            this.add_skill = function (skill) {
-                this.skills.push(skill);
+
+            var displayError = function (response) {
+                if (response.status == -1) {
+                    window.alert("Skills service unavailble.");
+                }
+                else {
+                    window.alert("HTTP Status Code: " + response.data.statusCode + "\n" +
+                        "Error Message: " + response.data.message);
+                }
             };
-            this.delete_skill = function (id) {
-                var index = this.skills.findIndex(skill => skill.id == id);
+
+            var displayOutOfSyncMessage = function () {
+                window.alert("Out of sync with skills service, refreshing skills.");
+            }
+
+            var refreshSkills = function () {
+                $http.get(apiUrl + "/skills")
+                    .then(function success(response) {
+                        skills.splice(0, skills.length);
+                        skills.push(...response.data);
+                    }, displayError);
+            };
+
+            var apiUrl = "___SKILLS_API_URL___";
+            var skills = [];
+
+            refreshSkills();
+
+            this.getSkills = function () {
+                return skills;
+            };
+            this.addSkill = function (skill) {
+                $http.post(apiUrl + "/skills", skill)
+                    .then(function success(response) {
+                        skills.push(response.data);
+                    }, function error(response) {
+                        if (hasStatusCode(response, 409)) {
+                            refreshSkills();
+                            displayOutOfSyncMessage();
+                        }
+                        else {
+                            displayError(response);
+                        }
+                    });
+            };
+            this.deleteSkill = function (id) {
+                var index = skills.findIndex(skill => skill.id == id);
                 if (index != -1) {
-                    this.skills.splice(index, 1);
+                    $http.delete(apiUrl + "/skills/" + id)
+                        .then(function success(response) {
+                            skills.splice(index, 1);
+                        }, function error(response) {
+                            if (hasStatusCode(response, 404)) {
+                                refreshSkills();
+                                displayOutOfSyncMessage();
+                            }
+                            else {
+                                displayError(response);
+                            }
+                        });
                 }
             };
-            this.update_skill_rating = function (id, rating) {
-                var matching_skill = this.skills.find(skill => skill.id == id);
-                if (matching_skill != null) {
-                    matching_skill.rating = rating;
-                }
+            this.updateSkillRating = function (id, rating, oldRating) {
+                $http.put(apiUrl + "/skills/" + id + "/" + rating)
+                    .then(function success(response) {
+                    }, function error(response) {
+                        if (hasStatusCode(response, 404)) {
+                            refreshSkills();
+                            displayOutOfSyncMessage();
+                        }
+                        else {
+                            skills.find(skill => skill.id == id).rating = oldRating;
+                            displayError(response);
+                        }
+                    });
             };
         });
-        app.controller("NewSkill", function ($scope, skills_api) {
+        app.controller("NewSkillController", function ($scope, SkillsService) {
             var init = function () {
                 $scope.skill = {
                     name: null,
@@ -91,25 +153,25 @@
 
             init();
 
-            $scope.add_skill = function () {
-                var nameAvailable = skills_api.get_skills().findIndex(skill => skill.name == $scope.skill.name) == -1;
+            $scope.addSkill = function () {
+                var nameAvailable = SkillsService.getSkills().findIndex(skill => skill.name == $scope.skill.name) == -1;
                 if (!nameAvailable) {
                     window.alert("A skill named " + $scope.skill.name + " already exists.");
                     return;
                 }
 
-                skills_api.add_skill($scope.skill);
+                SkillsService.addSkill($scope.skill);
                 init();
             };
         });
-        app.controller("SkillsList", function ($scope, skills_api) {
-            $scope.skills = skills_api.get_skills();
+        app.controller("SkillsListController", function ($scope, SkillsService) {
+            $scope.skills = SkillsService.getSkills();
 
-            $scope.update_skill_rating = function (id, rating) {
-                skills_api.update_skill_rating(id, rating);
+            $scope.updateSkillRating = function (id, rating, oldRating) {
+                SkillsService.updateSkillRating(id, rating);
             };
-            $scope.delete_skill = function (id) {
-                skills_api.delete_skill(id);
+            $scope.deleteSkill = function (id) {
+                SkillsService.deleteSkill(id);
             };
         });
     </script>
