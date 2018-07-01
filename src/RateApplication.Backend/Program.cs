@@ -1,5 +1,7 @@
 ﻿using System;
 using Nancy.Hosting.Self;
+using RateApplication.Backend.Nancy;
+using RateApplication.Backend.Sqlite;
 
 namespace RateApplication.Backend
 {
@@ -9,10 +11,11 @@ namespace RateApplication.Backend
         {
             var defaultServiceName = "RateApplication/api/";
             var defaultPort = 8080;
+            var defaultDatabase = "skills.sqlite";
             var usage =
-                $"Usage: {AppDomain.CurrentDomain.FriendlyName} [service name (default=\"{defaultServiceName}\")] [port (default={defaultPort})]";
+                $"Usage: {AppDomain.CurrentDomain.FriendlyName} [service name (default=\"{defaultServiceName}\")] [port (default={defaultPort})] [SQLite database (default={defaultDatabase})]";
 
-            if (args.Length > 2)
+            if (args.Length > 3)
             {
                 Console.WriteLine(usage);
                 return;
@@ -20,6 +23,7 @@ namespace RateApplication.Backend
 
             var serviceName = defaultServiceName;
             var port = defaultPort;
+            var database = defaultDatabase;
 
             if (args.Length >= 1)
             {
@@ -38,6 +42,11 @@ namespace RateApplication.Backend
                     return;
                 }
             }
+            if (args.Length >= 3)
+            {
+                database = args[2];
+            }
+
 
             var uri = new Uri($"http://localhost:{port}/{serviceName}");
 
@@ -46,7 +55,8 @@ namespace RateApplication.Backend
                 UrlReservations = {CreateAutomatically = true}
             };
             
-            Bootstrapper.SkillsManager = new SkillsManager(5);
+            var dbContext = new SkillsDbContext($"Data Source={database};Version=3;");
+            Bootstrapper.SkillsManager = new SqlSkillsManager(dbContext, 5);
 
             using (var host = new NancyHost(hostConfiguration, uri))
             {
