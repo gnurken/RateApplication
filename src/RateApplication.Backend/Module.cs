@@ -87,7 +87,7 @@ namespace RateApplication.Backend
             }
 
             var id = _skillsManager.AddSkill(skill);
-            skill = _skillsManager.GetSkill(id);
+            skill = _skillsManager.GetSkill(id).Value;
             return Response.AsJson(skill).WithHeader(
                 "Location",
                 Context.Request.Url + $"/{id}");

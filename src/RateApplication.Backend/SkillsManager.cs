@@ -23,14 +23,14 @@ namespace RateApplication.Backend
 
         public IReadOnlyList<Skill> GetSkills() => _skills;
 
-        public Skill GetSkill(int id)
+        public Skill? GetSkill(int id)
         {
-            return _skills.FirstOrDefault(skill => skill.Id == id);
+            return _skills.Cast<Skill?>().FirstOrDefault(skill => skill?.Id == id);
         }
 
-        public Skill GetSkill(string name)
+        public Skill? GetSkill(string name)
         {
-            return _skills.FirstOrDefault(skill => skill.Name == name);
+            return _skills.Cast<Skill?>().FirstOrDefault(skill => skill?.Name == name);
         }
 
         public bool HasSkill(int id)
@@ -47,7 +47,6 @@ namespace RateApplication.Backend
 
         public int AddSkill(Skill skill)
         {
-            if (skill == null) throw new ArgumentNullException(nameof(skill));
             if (skill.Rating > MaxRating || skill.Rating < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(skill), $"Valid rating range (0-{MaxRating})");
@@ -71,14 +70,19 @@ namespace RateApplication.Backend
                 throw new ArgumentOutOfRangeException(nameof(rating), $"Valid rating range (0-{MaxRating})");
             }
 
-            var skill = GetSkill(id);
-            if (skill == null)
+            var index = _skills.FindIndex(skill => skill.Id == id);
+            if (index == -1)
             {
                 throw new ArgumentException($"No Skill with id {id} exists.",
                     nameof(id));
             }
 
-            skill.Rating = rating;
+            _skills[index] = new Skill
+            {
+                Id = id,
+                Rating = rating,
+                Name = _skills[index].Name
+            };
         }
 
         public void RemoveSkill(int id)

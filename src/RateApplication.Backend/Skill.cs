@@ -2,7 +2,7 @@
 
 namespace RateApplication.Backend
 {
-    public class Skill
+    public struct Skill
     {
         public int Id { get; set; }
         public string Name { get; set; }
